@@ -13,6 +13,10 @@
     <header class="header">
         <div class="container">
             <h1 class="logo">📊 Crypto Portfolio Tracker</h1>
+            <div class="header-controls">
+                <button id="darkModeToggle" class="btn btn-secondary">🌙 Dark Mode</button>
+                <button id="exportBtn" class="btn btn-secondary">📊 Export Data</button>
+            </div>
             <div class="header-stats">
                 <div class="stat">
                     <span class="stat-label">Total Value</span>
@@ -72,6 +76,30 @@
                     <div class="chart-container">
                         <h3>Portfolio Performance</h3>
                         <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+                <!-- New Features Section -->
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>📈 Price Alerts</h3>
+                        <div class="alert-form">
+                            <select id="alertCoin" class="form-control">
+                                <option value="">Select coin...</option>
+                            </select>
+                            <input type="number" id="alertPrice" class="form-control" placeholder="Target price">
+                            <button id="addAlertBtn" class="btn btn-primary">Set Alert</button>
+                        </div>
+                        <div id="alertsList" class="alerts-list">
+                            <!-- Alerts will be added here -->
+                        </div>
+                    </div>
+                    <div class="feature-card">
+                        <h3>💰 Quick Actions</h3>
+                        <div class="quick-actions">
+                            <button id="clearPortfolioBtn" class="btn btn-danger">Clear Portfolio</button>
+                            <button id="backupBtn" class="btn btn-secondary">Backup Data</button>
+                            <button id="restoreBtn" class="btn btn-secondary">Restore Data</button>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -15,6 +15,9 @@ class CryptoPortfolioTracker {
         this.updatePortfolio();
         this.updateCharts();
         this.startPriceUpdates();
+        this.loadDarkModePreference();
+        this.populateAlertCoins();
+        this.updateAlertsList();
     }
 
     // Load coins from CoinGecko API
@@ -54,6 +57,34 @@ class CryptoPortfolioTracker {
                 coinPrice.value = selectedCoin.current_price;
             }
         });
+
+        // New feature event listeners
+        this.setupNewFeatureListeners();
+    }
+
+    // Setup new feature event listeners
+    setupNewFeatureListeners() {
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
+
+        // Export data
+        const exportBtn = document.getElementById('exportBtn');
+        exportBtn.addEventListener('click', () => this.exportData());
+
+        // Price alerts
+        const addAlertBtn = document.getElementById('addAlertBtn');
+        addAlertBtn.addEventListener('click', () => this.addPriceAlert());
+
+        // Quick actions
+        const clearPortfolioBtn = document.getElementById('clearPortfolioBtn');
+        clearPortfolioBtn.addEventListener('click', () => this.clearPortfolio());
+
+        const backupBtn = document.getElementById('backupBtn');
+        backupBtn.addEventListener('click', () => this.backupData());
+
+        const restoreBtn = document.getElementById('restoreBtn');
+        restoreBtn.addEventListener('click', () => this.restoreData());
     }
 
     // Add coin to portfolio
@@ -341,6 +372,213 @@ class CryptoPortfolioTracker {
     // Save portfolio to localStorage
     savePortfolio() {
         localStorage.setItem('cryptoPortfolio', JSON.stringify(this.portfolio));
+    }
+
+    // New Feature Methods
+
+    // Toggle dark mode
+    toggleDarkMode() {
+        const body = document.body;
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        if (body.classList.contains('dark-mode')) {
+            body.classList.remove('dark-mode');
+            darkModeToggle.textContent = '🌙 Dark Mode';
+            localStorage.setItem('darkMode', 'false');
+        } else {
+            body.classList.add('dark-mode');
+            darkModeToggle.textContent = '☀️ Light Mode';
+            localStorage.setItem('darkMode', 'true');
+        }
+    }
+
+    // Export portfolio data
+    exportData() {
+        const data = {
+            portfolio: this.portfolio,
+            exportDate: new Date().toISOString(),
+            totalValue: this.calculateTotalValue()
+        };
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `crypto-portfolio-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showMessage('Portfolio data exported successfully!', 'success');
+    }
+
+    // Add price alert
+    addPriceAlert() {
+        const alertCoin = document.getElementById('alertCoin');
+        const alertPrice = document.getElementById('alertPrice');
+        
+        if (!alertCoin.value || !alertPrice.value) {
+            this.showMessage('Please select a coin and enter a target price.', 'error');
+            return;
+        }
+
+        const coin = this.coins.find(c => c.id === alertCoin.value);
+        const alert = {
+            id: Date.now(),
+            coinId: alertCoin.value,
+            coinName: coin.name,
+            targetPrice: parseFloat(alertPrice.value),
+            createdAt: new Date().toISOString()
+        };
+
+        const alerts = this.loadAlerts();
+        alerts.push(alert);
+        localStorage.setItem('priceAlerts', JSON.stringify(alerts));
+        
+        this.updateAlertsList();
+        this.showMessage(`Alert set for ${coin.name} at $${alertPrice.value}!`, 'success');
+        
+        alertCoin.value = '';
+        alertPrice.value = '';
+    }
+
+    // Load alerts from localStorage
+    loadAlerts() {
+        const saved = localStorage.getItem('priceAlerts');
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    // Update alerts list display
+    updateAlertsList() {
+        const alertsList = document.getElementById('alertsList');
+        const alerts = this.loadAlerts();
+        
+        alertsList.innerHTML = '';
+        
+        alerts.forEach(alert => {
+            const alertItem = document.createElement('div');
+            alertItem.className = 'alert-item';
+            alertItem.innerHTML = `
+                <span>${alert.coinName} - $${alert.targetPrice}</span>
+                <button onclick="portfolioTracker.removeAlert(${alert.id})" class="btn btn-danger">Remove</button>
+            `;
+            alertsList.appendChild(alertItem);
+        });
+    }
+
+    // Remove alert
+    removeAlert(alertId) {
+        const alerts = this.loadAlerts();
+        const filteredAlerts = alerts.filter(alert => alert.id !== alertId);
+        localStorage.setItem('priceAlerts', JSON.stringify(filteredAlerts));
+        this.updateAlertsList();
+        this.showMessage('Alert removed!', 'success');
+    }
+
+    // Clear portfolio
+    clearPortfolio() {
+        if (confirm('Are you sure you want to clear your entire portfolio? This action cannot be undone.')) {
+            this.portfolio = [];
+            this.savePortfolio();
+            this.updatePortfolio();
+            this.updateCharts();
+            this.showMessage('Portfolio cleared!', 'success');
+        }
+    }
+
+    // Backup data
+    backupData() {
+        const backup = {
+            portfolio: this.portfolio,
+            alerts: this.loadAlerts(),
+            settings: {
+                darkMode: localStorage.getItem('darkMode') === 'true'
+            },
+            backupDate: new Date().toISOString()
+        };
+        
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `crypto-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showMessage('Backup created successfully!', 'success');
+    }
+
+    // Restore data
+    restoreData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                try {
+                    const backup = JSON.parse(event.target.result);
+                    
+                    if (backup.portfolio) {
+                        this.portfolio = backup.portfolio;
+                        this.savePortfolio();
+                    }
+                    
+                    if (backup.alerts) {
+                        localStorage.setItem('priceAlerts', JSON.stringify(backup.alerts));
+                    }
+                    
+                    if (backup.settings && backup.settings.darkMode) {
+                        document.body.classList.add('dark-mode');
+                        document.getElementById('darkModeToggle').textContent = '☀️ Light Mode';
+                    }
+                    
+                    this.updatePortfolio();
+                    this.updateCharts();
+                    this.updateAlertsList();
+                    
+                    this.showMessage('Data restored successfully!', 'success');
+                } catch (error) {
+                    this.showMessage('Error restoring data. Please check your backup file.', 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+        };
+        
+        input.click();
+    }
+
+    // Calculate total portfolio value
+    calculateTotalValue() {
+        return this.portfolio.reduce((total, coin) => {
+            return total + (coin.amount * coin.currentPrice);
+        }, 0);
+    }
+
+    // Load dark mode preference
+    loadDarkModePreference() {
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) {
+            document.body.classList.add('dark-mode');
+            document.getElementById('darkModeToggle').textContent = '☀️ Light Mode';
+        }
+    }
+
+    // Populate alert coins dropdown
+    populateAlertCoins() {
+        const alertCoin = document.getElementById('alertCoin');
+        if (alertCoin) {
+            alertCoin.innerHTML = '<option value="">Select coin...</option>';
+            this.coins.forEach(coin => {
+                const option = document.createElement('option');
+                option.value = coin.id;
+                option.textContent = `${coin.name} (${coin.symbol.toUpperCase()})`;
+                alertCoin.appendChild(option);
+            });
+        }
     }
 }
 
