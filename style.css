@@ -388,9 +388,31 @@ body {
 
 .alert-form {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
     margin-bottom: 1rem;
+    align-items: end;
+}
+
+@media (max-width: 768px) {
+    .alert-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-controls .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }
 
 .alerts-list {
