@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Portfolio Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">📊 Crypto Portfolio Tracker</h1>
+            <div class="header-stats">
+                <div class="stat">
+                    <span class="stat-label">Total Value</span>
+                    <span class="stat-value" id="totalValue">$0.00</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">24h Change</span>
+                    <span class="stat-value" id="totalChange">+0.00%</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <!-- Add Coin Section -->
+            <section class="add-coin-section">
+                <h2>Add New Coin</h2>
+                <div class="add-coin-form">
+                    <div class="form-group">
+                        <label for="coinSelect">Select Coin:</label>
+                        <select id="coinSelect" class="form-control">
+                            <option value="">Loading coins...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="coinAmount">Amount:</label>
+                        <input type="number" id="coinAmount" class="form-control" placeholder="0.00" step="0.000001">
+                    </div>
+                    <div class="form-group">
+                        <label for="coinPrice">Purchase Price (USD):</label>
+                        <input type="number" id="coinPrice" class="form-control" placeholder="0.00" step="0.01">
+                    </div>
+                    <button id="addCoinBtn" class="btn btn-primary">Add to Portfolio</button>
+                </div>
+            </section>
+
+            <!-- Portfolio Section -->
+            <section class="portfolio-section">
+                <h2>Your Portfolio</h2>
+                <div class="portfolio-grid">
+                    <div class="portfolio-cards" id="portfolioCards">
+                        <!-- Portfolio cards will be added here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <h2>Portfolio Analytics</h2>
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Portfolio Distribution</h3>
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Portfolio Performance</h3>
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Crypto Portfolio Tracker. Built by Shay</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html> 
