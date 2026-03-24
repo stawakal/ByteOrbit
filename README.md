@@ -1,4 +1,4 @@
-# 📊 Crypto Portfolio Tracker
+# Crypto Portfolio Tracker
 
 A modern, responsive web application for tracking cryptocurrency investments with real-time price updates, portfolio analytics, and beautiful data visualization.
 
